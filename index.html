@@ -195,9 +195,7 @@ button{font-family:inherit;border:none;background:none;cursor:pointer;color:inhe
 /* 主内容初始隐藏，进入后才显示 */
 body:not(.entered) .shell{opacity:0}
 .shell{transition:opacity .8s ease}
-/* intro 里的按钮不受 guest 限制 */
-#intro [contenteditable="true"]{pointer-events:auto !important;-webkit-user-select:auto;user-select:auto}
-
+/* intro 按钮是纯按钮，不参与编辑 */
 /* 设置板块：游客隐藏，解锁后才显示 */
 #sec-settings{display:none}
 body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
@@ -221,30 +219,32 @@ body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
 .hero-title{
   font-family:'Noto Serif SC',serif;
   font-size:clamp(38px,9vw,68px);
-  font-weight:300;line-height:1.15;letter-spacing:2px;
+  font-weight:300;line-height:1.5;letter-spacing:2px;
   color:#111;
 }
 .hero-roll{
-  display:inline-block;height:1.2em;overflow:hidden;vertical-align:bottom;
+  display:inline-block;height:1.5em;overflow:hidden;vertical-align:bottom;
   position:relative;
 }
 .hero-roll-track{
   display:flex;flex-direction:column;
-  animation:rollUp 9s cubic-bezier(.77,0,.18,1) infinite;
+  will-change:transform;
+  animation:rollUp 10s cubic-bezier(.6,0,.35,1) infinite;
 }
 .hero-roll-track span{
-  height:1.2em;line-height:1.2em;
+  height:1.5em;line-height:1.5em;
   font-style:italic;
   background:linear-gradient(135deg,#1a1a1c 0%,#5a6070 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
   white-space:nowrap;
 }
 @keyframes rollUp{
-  0%,18%{transform:translateY(0)}
-  25%,43%{transform:translateY(-1.2em)}
-  50%,68%{transform:translateY(-2.4em)}
-  75%,93%{transform:translateY(-3.6em)}
-  100%{transform:translateY(-4.8em)}
+  0%,14%{transform:translateY(0)}
+  20%,35%{transform:translateY(-1.5em)}
+  41%,56%{transform:translateY(-3em)}
+  62%,77%{transform:translateY(-4.5em)}
+  83%,94%{transform:translateY(-6em)}
+  100%{transform:translateY(-7.5em)}
 }
 .hero-desc{
   margin-top:40px;font-size:14px;color:#6a6f78;max-width:440px;line-height:2;
@@ -738,8 +738,8 @@ section{scroll-margin-top:40px;margin-bottom:48px}
   <canvas id="introFog"></canvas>
   <div class="intro-hint" id="introHint">擦 一 擦</div>
   <div class="enter-wrap" id="enterWrap">
-    <button class="enter-btn" id="enterBtn" contenteditable="true">进 入</button>
-    <div class="enter-sub" contenteditable="true">轻轻推开这层雾</div>
+    <button class="enter-btn" id="enterBtn">进 入</button>
+    <div class="enter-sub">轻轻推开这层雾</div>
   </div>
 </div>
 
@@ -760,6 +760,7 @@ section{scroll-margin-top:40px;margin-bottom:48px}
             <span contenteditable="true">崩塌，</span>
             <span contenteditable="true">纷飞，</span>
             <span contenteditable="true">停息，</span>
+            <span contenteditable="true">堆积，</span>
           </span>
         </span><br>
         <span contenteditable="true">那我是雪花吗。</span>
