@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>癖の小世界 · Melancholic Notes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='18' font-size='18'%3E%E2%98%85%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@300;400;600;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+/* ============ Reset & Base ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:#1a1a1c;
+  background:linear-gradient(180deg,#fdfdfd 0%,#f3f4f6 45%,#eceef3 100%);
+  min-height:100vh;
+  overflow-x:hidden;
+  max-width:100vw;
+  line-height:1.7;
+}
+@media (hover:none){ body{cursor:auto} }
+img{max-width:100%;display:block}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+
+/* ============ Ripple ============ */
+.ripple{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:9998;
+  background:radial-gradient(circle,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.25) 25%,
+    rgba(180,190,210,0.12) 55%,
+    rgba(180,190,210,0.04) 75%,
+    transparent 100%);
+  box-shadow:0 0 20px rgba(255,255,255,0.3);
+  transform:translate(-50%,-50%) scale(0);
+  animation:ripple 1s cubic-bezier(.16,.8,.3,1) forwards;
+}
+.ripple::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1px solid rgba(255,255,255,0.4);
+  opacity:0;
+  animation:rippleRing 1s ease-out forwards;
+}
+@keyframes ripple{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(5.5);opacity:0}
+}
+@keyframes rippleRing{
+  0%{transform:scale(0.3);opacity:0.7}
+  100%{transform:scale(2.2);opacity:0}
+}
+
+/* ============ Layout Shell ============ */
+.shell{min-height:100vh}
+
+/* ============ Main ============ */
+.main{padding:72px 44px 120px;max-width:780px;margin:0 auto}
+
+/* ============ Hero (许愿星空) ============ */
+.hero{
+  min-height:100vh;padding:100px 0 140px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;
+}
+#meteorCanvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+}
+.hero > *:not(#meteorCanvas){position:relative;z-index:1}
+
+/* ============ Wish Splash (black starry sky, before fog) ============ */
+#wishIntro{
+  position:fixed;inset:0;z-index:3000;
+  background:radial-gradient(ellipse at 50% 30%,#141a2e 0%,#070912 70%);
+  transition:opacity 1.2s ease, visibility 1.2s;
+  overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:80px 28px 50px;box-sizing:border-box;
+}
+#wishIntro.gone{opacity:0;visibility:hidden;pointer-events:none}
+#wishStars,#wishMeteors{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wish-title{
+  position:relative;z-index:2;color:#fff;
+  font-family:'Noto Serif SC',serif;
+}
+.wish-title h1{
+  font-size:34px;font-weight:700;letter-spacing:2px;line-height:1.3;
+  text-shadow:0 0 20px rgba(150,180,255,0.3);
+}
+.wish-title h2{
+  font-size:30px;font-weight:700;letter-spacing:2px;
+  background:linear-gradient(90deg,#ffd98a,#ffb86b);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  margin-top:6px;
+}
+.wish-title p{font-size:13px;color:#8892a8;margin-top:14px;letter-spacing:1px}
+.wish-form{position:relative;z-index:2}
+.wish-input-row{
+  display:flex;gap:10px;align-items:center;
+  background:rgba(255,255,255,0.08);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:40px;padding:6px 6px 6px 20px;
+}
+.wish-input-row input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:#fff;font-size:14px;
+}
+.wish-input-row input::placeholder{color:#7a8499}
+.wish-input-row button{
+  background:rgba(255,255,255,0.12);color:#fff;border:none;
+  width:46px;height:46px;border-radius:50%;
+  font-size:14px;cursor:pointer;transition:transform .2s;
+}
+.wish-input-row button:active{transform:scale(0.9)}
+.wish-hint{font-size:12px;color:#6a7488;margin-top:14px;letter-spacing:1px}
+.wish-skip{
+  position:absolute;top:20px;right:20px;z-index:3;
+  font-size:12px;color:#6a7488;letter-spacing:2px;
+  background:transparent;border:none;cursor:pointer;
+}
+.wish-toast{
+  position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);
+  background:rgba(20,26,46,0.85);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;padding:16px 22px;
+  display:flex;align-items:center;gap:14px;
+  opacity:0;transition:opacity .4s;z-index:4;
+  max-width:80vw;
+}
+.wish-toast.show{opacity:1}
+.wish-toast .star{color:#ffd98a;font-size:22px}
+.wish-toast .t1{color:#fff;font-size:15px;font-weight:600}
+.wish-toast .t2{color:#8892a8;font-size:12px;margin-top:2px}
+.wish-fly-text{
+  position:absolute;left:50%;bottom:120px;transform:translateX(-50%);
+  color:#cdd8ee;font-size:15px;letter-spacing:3px;
+  z-index:3;pointer-events:none;white-space:nowrap;
+  transition:transform 3.5s ease-out,opacity 3.5s;
+  text-shadow:0 0 12px rgba(150,180,255,0.6);
+}
+.wish-fly-text.flying{
+  transform:translate(-50%,-60vh) scale(0.8);
+  opacity:0;
+}
+
+/* ============ Intro Splash (full-screen fog) ============ */
+#intro{
+  position:fixed;inset:0;z-index:2000;
+  background:linear-gradient(180deg,#f0f2f6 0%,#e8ebf0 100%);
+  transition:opacity 1s ease, visibility 1s;
+  display:block;
+}
+#intro.gone{opacity:0;visibility:hidden;pointer-events:none}
+#introSnow, #introFog{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+#introSnow{pointer-events:none;z-index:2}
+#introFog{z-index:3;cursor:grab;transition:opacity 1.2s}
+#introFog.cleared{opacity:0;pointer-events:none}
+.intro-hint{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:4;font-size:12px;letter-spacing:6px;color:#8a8f98;
+  pointer-events:none;transition:opacity .8s;
+}
+.intro-hint::before,.intro-hint::after{
+  content:'';display:block;width:36px;height:1px;background:#b0b5bd;margin:12px auto;
+}
+.enter-wrap{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0.9);
+  z-index:5;opacity:0;pointer-events:none;
+  transition:opacity .8s ease .2s, transform .8s ease .2s;
+  text-align:center;
+}
+.enter-wrap.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
+.enter-btn{
+  padding:16px 48px;border-radius:40px;
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.7);
+  box-shadow:0 8px 32px rgba(30,35,50,0.12), inset 0 1px 0 rgba(255,255,255,0.8);
+  color:#1a1a1c;font-size:14px;letter-spacing:6px;
+  font-family:'Noto Serif SC',serif;
+  transition:all .25s;
+}
+.enter-btn:hover{
+  background:rgba(255,255,255,0.55);
+  transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(30,35,50,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.enter-sub{
+  margin-top:14px;font-size:10px;letter-spacing:3px;color:#9aa0aa;
+}
+
+/* 主内容初始隐藏，进入后才显示 */
+body:not(.entered) .shell{opacity:0}
+.shell{transition:opacity .8s ease}
+/* intro 里的按钮不受 guest 限制 */
+#intro [contenteditable="true"]{pointer-events:auto !important;-webkit-user-select:auto;user-select:auto}
+
+/* 设置板块：游客隐藏，解锁后才显示 */
+#sec-settings{display:none}
+body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* 全局飘雪：从开场到内页一直飘 */
+#globalSnow{
+  position:fixed;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:800;
+}
+
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:3px;color:#8a8f98;
+  text-transform:uppercase;margin-bottom:24px;
+}
+.hero-tag::before{content:'';width:28px;height:1px;background:#8a8f98}
+.hero-title{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(38px,9vw,68px);
+  font-weight:300;line-height:1.15;letter-spacing:2px;
+  color:#111;
+}
+.hero-roll{
+  display:inline-block;height:1.2em;overflow:hidden;vertical-align:bottom;
+  position:relative;
+}
+.hero-roll-track{
+  display:flex;flex-direction:column;
+  animation:rollUp 9s cubic-bezier(.77,0,.18,1) infinite;
+}
+.hero-roll-track span{
+  height:1.2em;line-height:1.2em;
+  font-style:italic;
+  background:linear-gradient(135deg,#1a1a1c 0%,#5a6070 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:nowrap;
+}
+@keyframes rollUp{
+  0%,18%{transform:translateY(0)}
+  25%,43%{transform:translateY(-1.2em)}
+  50%,68%{transform:translateY(-2.4em)}
+  75%,93%{transform:translateY(-3.6em)}
+  100%{transform:translateY(-4.8em)}
+}
+.hero-desc{
+  margin-top:40px;font-size:14px;color:#6a6f78;max-width:440px;line-height:2;
+}
+.hero-meta{
+  margin-top:60px;display:flex;gap:48px;font-size:11px;color:#9aa0aa;letter-spacing:1px;
+}
+.hero-meta b{display:block;font-size:20px;color:#1a1a1c;font-weight:500;font-family:'Noto Serif SC',serif;margin-bottom:2px}
+
+  .hero-cat{width:140px;align-self:flex-end;margin-top:10px}
+}
+
+/* ============ Glass Card ============ */
+.card{
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
+  border:1px solid rgba(255,255,255,0.9);
+  box-shadow:0 10px 40px rgba(30,35,50,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+  border-radius:24px;
+  padding:44px 40px;margin-bottom:40px;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;inset:0;border-radius:20px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(255,255,255,0.6) 0%,transparent 40%);
+}
+.card-dark{
+  background:linear-gradient(135deg,rgba(25,25,30,0.92),rgba(45,48,58,0.88));
+  color:#e8e8ec;border:none;
+}
+.card-dark::before{background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 50%)}
+.card-dark .sec-desc{color:#9aa0aa}
+
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.sec-num{
+  font-family:'Noto Serif SC',serif;font-size:12px;color:#9aa0aa;letter-spacing:2px;
+}
+.sec-title{
+  font-family:'Noto Serif SC',serif;font-size:22px;font-weight:600;letter-spacing:1px;
+  position:relative;padding-right:28px;
+}
+.sec-title::after{
+  content:'♥';position:absolute;right:0;top:2px;
+  font-size:15px;
+  background:linear-gradient(160deg,#f0f2f5 0%,#c8cdd6 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:heartBeat 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 0 6px rgba(200,210,225,0.5));
+}
+@keyframes heartBeat{
+  0%,100%{transform:scale(1);opacity:0.85}
+  50%{transform:scale(1.25);opacity:1}
+}
+.sec-desc{font-size:12.5px;color:#8a8f98;margin-top:4px;margin-bottom:16px;line-height:1.8}
+
+/* Editable —— 默认 guest 只读，body.editor 才放开 */
+[contenteditable="true"]{
+  outline:none;border-radius:4px;transition:background .2s,outline .2s;
+}
+body.guest [contenteditable="true"]{
+  pointer-events:none;-webkit-user-select:none;user-select:none;cursor:default;
+}
+body.guest [contenteditable="true"]:hover{background:transparent;outline:none}
+body.editor [contenteditable="true"]:hover{
+  background:rgba(0,0,0,0.04);
+  outline:1px dashed rgba(20,20,30,0.25);outline-offset:3px;
+}
+body.editor .card-dark [contenteditable="true"]:hover{
+  outline-color:rgba(255,255,255,0.35);background:rgba(255,255,255,0.06);
+}
+body.editor [contenteditable="true"]:focus{
+  outline:2px solid rgba(20,20,30,0.5);outline-offset:3px;
+  background:rgba(255,255,255,0.6);
+}
+body.editor .card-dark [contenteditable="true"]:focus{
+  outline-color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.1);
+}
+body.guest .g-item, body.guest .g-add, body.guest .toggle, body.guest .tile{pointer-events:none;opacity:0.9}
+/* 游客可以点卡片看详情，但不能换图 */
+body.guest .proj-thumb, body.guest #projModalImg{pointer-events:none;opacity:0.85;cursor:default}
+
+/* Hero roll editable */
+.hero-roll-track span{cursor:text}
+.hero-roll-track.paused{animation-play-state:paused}
+
+/* Hidden lock */
+.lock-btn{
+  position:fixed;right:14px;bottom:14px;z-index:500;
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);
+  border:1px solid rgba(0,0,0,0.08);
+  display:grid;place-items:center;
+  opacity:0.25;transition:all .25s;color:#555;
+}
+.lock-btn:hover{opacity:1;transform:scale(1.15)}
+.lock-btn svg{width:13px;height:13px}
+body.editor .lock-btn{opacity:0.7;background:#1a1a1c;color:#fff}
+
+/* Password modal */
+.modal-mask{
+  position:fixed;inset:0;background:rgba(20,20,30,0.4);backdrop-filter:blur(6px);
+  display:grid;place-items:center;z-index:1000;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-mask.show{opacity:1;pointer-events:auto}
+.modal{
+  width:min(88vw,320px);padding:26px 24px;
+  background:rgba(255,255,255,0.88);backdrop-filter:blur(24px);
+  border-radius:20px;border:1px solid rgba(255,255,255,0.9);
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+  transform:translateY(10px) scale(0.97);transition:transform .25s;
+}
+.modal-mask.show .modal{transform:translateY(0) scale(1)}
+.modal h3{font-family:'Noto Serif SC',serif;font-size:17px;margin-bottom:6px;letter-spacing:1px}
+.modal p{font-size:12px;color:#8a8f98;margin-bottom:18px;line-height:1.6}
+.modal input{
+  width:100%;padding:11px 14px;border-radius:12px;
+  border:1px solid rgba(0,0,0,0.1);background:#fff;
+  font-size:15px;letter-spacing:4px;text-align:center;
+  font-family:inherit;outline:none;transition:border .2s;
+}
+.modal input:focus{border-color:#1a1a1c}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions button{
+  flex:1;padding:10px;border-radius:12px;font-size:13px;letter-spacing:1px;
+}
+.modal-cancel{background:rgba(0,0,0,0.05);color:#555}
+.modal-ok{background:#1a1a1c;color:#fff}
+.modal.err input{border-color:#c0392b;animation:shake .3s}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+.edit-hint{
+  position:absolute;top:14px;right:14px;font-size:10px;
+  color:#b0b5bd;letter-spacing:1px;pointer-events:none;
+}
+
+/* ============ Overview ============ */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+/* Flip card */
+.flip{
+  perspective:1000px;cursor:pointer;
+  min-height:140px;
+}
+.flip-inner{
+  position:relative;width:100%;height:100%;min-height:140px;
+  transition:transform .7s cubic-bezier(.4,.2,.2,1);
+  transform-style:preserve-3d;
+}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:16px;padding:26px 22px;
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(255,255,255,0.85);
+  box-shadow:0 6px 20px rgba(30,35,50,0.05);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.flip-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(135deg,rgba(30,32,38,0.92),rgba(55,58,68,0.88));
+  color:#e8e8ec;border:none;
+  font-size:12.5px;line-height:1.9;
+}
+.flip-back .back-label{
+  font-size:10px;letter-spacing:2px;color:#8a8f98;margin-bottom:8px;
+}
+.stat b{font-family:'Noto Serif SC',serif;font-size:28px;font-weight:400;display:block;color:#111}
+.stat span{font-family:'Noto Serif SC',serif;font-size:15px;color:#2a2d35;letter-spacing:1px;display:block;line-height:1.6}
+
+/* ============ Projects ============ */
+.proj-list{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.proj-card{
+  position:relative;border-radius:20px;overflow:hidden;
+  padding:16px;cursor:pointer;
+  display:flex;flex-direction:column;gap:10px;align-items:flex-start;
+  transition:transform .3s, box-shadow .3s;
+  isolation:isolate;
+}
+/* 流光旋转层 */
+.proj-card::before{
+  content:'';position:absolute;inset:-60%;width:220%;height:220%;
+  background:conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255,255,255,0.9) 30deg,
+    transparent 70deg,
+    transparent 180deg,
+    rgba(170,190,220,0.55) 230deg,
+    transparent 280deg
+  );
+  animation:projSpin 6s linear infinite;
+  pointer-events:none;z-index:0;
+}
+/* 灰色渐变底层 */
+.proj-card::after{
+  content:'';position:absolute;inset:1.5px;border-radius:18px;
+  background:linear-gradient(160deg,#f2f4f7 0%,#e0e4ea 60%,#cdd2db 100%);
+  z-index:1;
+}
+.proj-card > *{position:relative;z-index:2}
+@keyframes projSpin{to{transform:rotate(360deg)}}
+.proj-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(30,35,50,0.15)}
+
+/* 卡片顶部积雪 */
+.proj-snow{
+  position:absolute;top:-2px;left:-2px;right:-2px;height:18px;
+  background:linear-gradient(180deg,#ffffff 0%,#f0f4f9 80%,transparent 100%);
+  border-radius:18px 18px 50% 50% / 18px 18px 30% 30%;
+  z-index:3;pointer-events:none;
+  animation:snowMelt 8s ease-in-out infinite;
+}
+@keyframes snowMelt{
+  0%,100%{transform:scaleY(1);opacity:1}
+  50%{transform:scaleY(0.55);opacity:0.7}
+}
+/* 融化水滴 */
+.proj-card .drip{
+  position:absolute;top:14px;width:3px;height:8px;border-radius:0 0 3px 3px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(200,215,235,0.6));
+  z-index:3;pointer-events:none;opacity:0;
+  animation:dripFall 3s ease-in infinite;
+}
+.proj-card .drip.d1{left:20%;animation-delay:0s}
+.proj-card .drip.d2{left:55%;animation-delay:1.2s;height:6px}
+.proj-card .drip.d3{left:80%;animation-delay:2.1s}
+@keyframes dripFall{
+  0%{transform:translateY(0);opacity:0}
+  20%{opacity:0.9}
+  100%{transform:translateY(30px);opacity:0}
+}
+
+.proj-thumb{
+  width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(255,255,255,0.9);
+  position:relative;
+}
+.proj-thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:4px}
+.proj-thumb .thumb-ph{
+  position:absolute;inset:8px;border-radius:8px;
+  background:rgba(255,255,255,0.7);
+}
+.proj-thumb .thumb-ph::before{
+  content:'';position:absolute;left:10px;top:12px;width:30%;height:8px;border-radius:4px;background:#b8c4d8;
+}
+.proj-thumb .thumb-ph::after{
+  content:'';position:absolute;left:10px;top:28px;right:10px;height:5px;border-radius:3px;background:rgba(184,196,216,0.5);
+  box-shadow:0 9px 0 rgba(184,196,216,0.35), 0 18px 0 rgba(184,196,216,0.2);
+}
+.proj-body{width:100%}
+.proj-body .proj-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:9px;letter-spacing:2px;
+  padding:2px 9px;border-radius:20px;background:#1a1a1c;color:#fff;
+  margin-bottom:6px;
+}
+.proj-body .proj-badge::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:#a8d5ba;box-shadow:0 0 6px #a8d5ba;
+}
+.proj-body .proj-num{
+  font-family:'Noto Serif SC',serif;font-size:26px;font-weight:300;
+  color:#1a1a1c;line-height:1;display:inline-block;
+}
+.proj-body .proj-num::after{
+  content:' ˚';font-size:15px;color:#b8c4d4;vertical-align:super;
+}
+.proj-body h4{
+  font-family:'Noto Serif SC',serif;font-size:14px;font-weight:600;margin:5px 0 5px;
+}
+.proj-body p{font-size:11px;color:#5a6070;line-height:1.6}
+
+/* 详情 modal */
+.proj-modal{
+  position:fixed;inset:0;z-index:1500;
+  background:rgba(20,20,30,0.5);backdrop-filter:blur(8px);
+  display:grid;place-items:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.proj-modal.show{opacity:1;pointer-events:auto}
+.proj-modal-box{
+  width:min(92vw,560px);max-height:88vh;overflow:auto;
+  background:linear-gradient(180deg,#fafbfd,#eef1f6);
+  border-radius:24px;padding:26px;
+  transform:translateY(15px);transition:transform .3s;
+}
+.proj-modal.show .proj-modal-box{transform:translateY(0)}
+.proj-modal-close{
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,0.06);display:grid;place-items:center;
+  float:right;font-size:16px;color:#555;
+}
+.proj-modal-img{
+  width:100%;border-radius:16px;overflow:hidden;margin:14px 0;
+  background:#fff;border:1px solid rgba(0,0,0,0.06);
+  cursor:pointer;min-height:200px;
+  display:grid;place-items:center;
+}
+.proj-modal-img img{width:100%;height:auto;max-height:60vh;object-fit:contain;display:block}
+.proj-modal-img .ph{color:#9aa0aa;font-size:12px;letter-spacing:2px;padding:40px}
+.proj-modal h3{font-family:'Noto Serif SC',serif;font-size:20px;margin:6px 0}
+.proj-modal .meta{font-size:11px;color:#9aa0aa;letter-spacing:1px}
+
+/* ============ Gallery (multi-image) ============ */
+.gallery{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+}
+.g-item{
+  position:relative;border-radius:14px;overflow:hidden;
+  aspect-ratio:4/5;background:#e8eaee;
+  border:1px solid rgba(255,255,255,0.8);
+  cursor:pointer;group-name:gallery;
+}
+.g-item img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.g-item:hover img{transform:scale(1.05)}
+.g-item .g-label{
+  position:absolute;left:8px;bottom:8px;right:8px;
+  padding:6px 10px;border-radius:8px;font-size:11px;
+  background:rgba(20,20,30,0.55);backdrop-filter:blur(8px);color:#fff;
+}
+.g-add{
+  aspect-ratio:4/5;border-radius:14px;
+  border:1.5px dashed rgba(30,30,40,0.25);
+  display:grid;place-items:center;color:#8a8f98;
+  font-size:12px;letter-spacing:2px;transition:all .2s;
+}
+.g-add:hover{border-color:#1a1a1c;color:#1a1a1c;background:rgba(255,255,255,0.5)}
+
+/* ============ Articles ============ */
+.article{
+  padding:26px 22px;border-radius:16px;margin-bottom:10px;
+  background:rgba(255,255,255,0.45);
+  border:1px solid rgba(255,255,255,0.8);
+}
+.article h4{font-family:'Noto Serif SC',serif;font-size:16px;font-weight:600;margin-bottom:6px}
+.article p{font-size:12.5px;color:#6a6f78;line-height:1.8}
+.article-meta{display:flex;gap:12px;font-size:10.5px;color:#9aa0aa;margin-top:10px;letter-spacing:1px}
+
+/* ============ Collage Wall ============ */
+.collage{
+  position:relative;display:grid;
+  grid-template-columns:1fr 1fr;gap:14px;
+  margin-top:10px;
+}
+.tile{
+  position:relative;border-radius:12px;overflow:hidden;
+  background:rgba(245,246,248,0.8);
+  border:1px solid rgba(0,0,0,0.06);
+  aspect-ratio:4/5;cursor:pointer;
+  transition:transform .25s, box-shadow .25s;
+}
+.tile:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(30,35,50,0.12)}
+.tile.wide{grid-column:span 2;aspect-ratio:16/10}
+.tile.tall{aspect-ratio:3/5}
+.tile img{
+  width:100%;height:100%;object-fit:contain;display:block;
+  padding:8px;
+}
+.tile-label{
+  position:absolute;left:8px;bottom:8px;
+  font-size:10px;letter-spacing:1.5px;color:#8a8f98;
+  background:rgba(255,255,255,0.8);backdrop-filter:blur(6px);
+  padding:3px 8px;border-radius:6px;
+}
+/* 叠加几何 */
+.geo{position:absolute;pointer-events:none;z-index:2}
+.geo-circle-coral{
+  width:90px;height:90px;border-radius:50%;
+  background:#e85d4a;opacity:0.85;
+  right:-20px;top:-20px;
+  box-shadow:0 6px 20px rgba(232,93,74,0.35);
+}
+.geo-circle-gray{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(120,130,145,0.25);
+  left:30%;bottom:-18px;
+}
+.geo-rect-gray{
+  width:80px;height:40px;
+  background:rgba(120,130,145,0.18);
+  right:10%;top:20%;border-radius:4px;
+}
+.geo-watercolor{
+  width:120px;height:60px;border-radius:50%;
+  background:radial-gradient(circle,rgba(180,200,210,0.4),transparent 70%);
+  left:-20px;top:40%;
+}
+.collage-line{
+  position:absolute;pointer-events:none;z-index:1;
+  background:rgba(120,130,145,0.4);
+}
+.collage-note{
+  position:absolute;font-size:10px;color:#6a6f78;
+  letter-spacing:1px;z-index:3;pointer-events:none;
+  background:rgba(255,255,255,0.7);padding:2px 6px;border-radius:4px;
+}
+
+/* ============ Data bars ============ */
+.bar-row{margin-bottom:26px}
+.bar-row .bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:#3a3f4a}
+.bar-track{height:6px;border-radius:3px;background:rgba(0,0,0,0.07);overflow:hidden}
+.bar-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#1a1a1c,#5a6070);
+  transform-origin:left;transform:scaleX(0);
+  transition:transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+
+/* ============ Settings ============ */
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;
+}
+.setting-row:last-child{border-bottom:none}
+.toggle{
+  width:42px;height:24px;border-radius:12px;background:#ccc;
+  position:relative;transition:background .2s;
+}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;
+  border-radius:50%;background:#fff;transition:left .2s;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.toggle.on{background:#1a1a1c}
+.toggle.on::after{left:20px}
+
+/* ============ Section anchor spacing ============ */
+section{scroll-margin-top:40px;margin-bottom:48px}
+
+/* ============ Toast ============ */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a1a1c;color:#fff;padding:10px 20px;border-radius:30px;
+  font-size:12.5px;letter-spacing:1px;opacity:0;pointer-events:none;
+  transition:all .3s;z-index:9999;
+  backdrop-filter:blur(10px);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ Mobile ============ */
+@media (max-width:820px){
+  .main{padding:48px 22px 90px}
+  .gallery{grid-template-columns:repeat(2,1fr)}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body class="guest">
+
+<!-- 全局飘雪层 -->
+<canvas id="globalSnow"></canvas>
+
+<!-- ============ Wish Splash (black starry sky) ============ -->
+<div id="wishIntro">
+  <canvas id="wishStars"></canvas>
+  <canvas id="wishMeteors"></canvas>
+  <button class="wish-skip" id="wishSkip">跳 过</button>
+
+  <div class="wish-title">
+    <h1 contenteditable="true">写下愿望</h1>
+    <h2 contenteditable="true">让它飘进星空</h2>
+    <p contenteditable="true">流星会替你记住</p>
+  </div>
+
+  <div class="wish-form">
+    <div class="wish-input-row">
+      <input type="text" id="wishInput" placeholder="对着流星许下愿望…" maxlength="30">
+      <button id="wishGo">go</button>
+    </div>
+    <div class="wish-hint">写一句话，送给想送的人</div>
+  </div>
+
+  <div class="wish-toast" id="wishToast">
+    <span class="star">★</span>
+    <div>
+      <div class="t1">许愿成功</div>
+      <div class="t2">你将得偿所愿</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Intro Splash ============ -->
+<div id="intro">
+  <canvas id="introSnow"></canvas>
+  <canvas id="introFog"></canvas>
+  <div class="intro-hint" id="introHint">擦 一 擦</div>
+  <div class="enter-wrap" id="enterWrap">
+    <button class="enter-btn" id="enterBtn" contenteditable="true">进 入</button>
+    <div class="enter-sub" contenteditable="true">轻轻推开这层雾</div>
+  </div>
+</div>
+
+<!-- ============ Main ============ -->
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero" id="sec-hero">
+      <canvas id="meteorCanvas"></canvas>
+      <div class="hero-text">
+      <div class="hero-tag" contenteditable="true">‧₊˚✧ Oᴜʀ ᴡʜɪᴛᴇ ᴍᴇᴍᴏʀɪᴇs ʙᴇʟᴏɴɢ ᴛᴏ ᴜs ⁎⊹⁺</div>
+      <h1 class="hero-title">
+        <span contenteditable="true">我的情绪也会</span><br>
+        <span class="hero-roll">
+          <span class="hero-roll-track" id="rollTrack">
+            <span contenteditable="true">堆积，</span>
+            <span contenteditable="true">厚重，</span>
+            <span contenteditable="true">崩塌，</span>
+            <span contenteditable="true">纷飞，</span>
+            <span contenteditable="true">停息，</span>
+          </span>
+        </span><br>
+        <span contenteditable="true">那我是雪花吗。</span>
+      </h1>
+      <p class="hero-desc" contenteditable="true">
+        𓈒𓏸˚₊雪 が 交互 に 降る 瞬間𓇬₊˚。
+      </p>
+      <div class="hero-meta">
+        <div><b contenteditable="true">癖</b><span contenteditable="true">ID</span></div>
+        <div><b contenteditable="true">vian443</b><span contenteditable="true">小窝门牌号</span></div>
+      </div>
+      </div><!-- /hero-text -->
+    </section>
+
+    <!-- Overview -->
+    <section id="sec-overview">
+      <div class="card">
+        <span class="edit-hint">点击文字可编辑</span>
+        <div class="sec-head">
+          <span class="sec-num">/ 01</span>
+          <h2 class="sec-title" contenteditable="true">❅⋆癖癖⋆❅</h2>
+        </div>
+        <p class="sec-desc" contenteditable="true">鄧布利多 你說的對 愛是這世界上最偉大的魔法。</p>
+        <div class="stat-grid">
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="flip-face stat-front">
+                <span contenteditable="true">♡‧₊˚ 癖の信息 ✧˖*°</span>
+              </div>
+              <div class="flip-face flip-back">
+                <div class="back-label" contenteditable="true">⌯⦁⩊⦁⌯ಣ</div>
+                <div contenteditable="true">狮子座就是全宇宙坠可爱的。</div>
+              </div>
+            </div>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="flip-face stat-front">
+                <span contenteditable="true">♡‧₊˚ 癖の常点 </span>
+              </div>
+              <div class="flip-face flip-back">
+                <div class="back-label" contenteditable="true">⌯⦁⩊⦁⌯ಣ</div>
+                <div contenteditable="true">金铲铲/王者/瓦/三角洲/和平。</div>
+              </div>
+            </div>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="flip-face stat-front">
+                <span contenteditable="true">♡‧₊˚癖の喜点 </span>
+              </div>
+              <div class="flip-face flip-back">
+                <div class="back-label" contenteditable="true">⌯⦁⩊⦁⌯ಣ</div>
+                <div contenteditable="true">喜欢相敬如宾 一见如故 慷慨大方让物资 带我飞 脾气好 有耐心 不犟种。</div>
+              </div>
+            </div>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="flip-face stat-front">
+                <span contenteditable="true">♡‧₊˚癖の雷点</span>
+              </div>
+              <div class="flip-face flip-back">
+                <div class="back-label" contenteditable="true">⌯⦁⩊⦁⌯ಣ</div>
+                <div contenteditable="true">去去去去别在在卖惨。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="sec-projects">
+      <div class="card">
+        <div class="sec-head">
+          <span class="sec-num">/ 02</span>
+          <h2 class="sec-title" contenteditable="true">癖の小窝宝宝萌</h2>
+        </div>
+        <div class="proj-list">
+          <div class="proj-card tone-blue" data-project data-detail="https://catpp31.github.io/meigong/微信图片_20261025045245_64_133.jpg">
+            <div class="proj-snow"></div>
+            <span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span>
+            <div class="proj-thumb" data-thumb>
+              <img src="https://catpp31.github.io/meigong/1792869236353.gif" alt="表情包">
+            </div>
+            <div class="proj-body">
+              <span class="proj-badge">礼礼</span>
+              <span class="proj-num" contenteditable="true">主玩中</span>
+              <h4 contenteditable="true">癖の专属小猫咪</h4>
+              <p contenteditable="true">想與你共享的最近☆₊⁺🍮。</p>
+            </div>
+          </div>
+          <div class="proj-card tone-warm" data-project data-detail="https://catpp31.github.io/meigong/微信图片_20261025045245_64_133.jpg">
+            <div class="proj-snow"></div>
+            <span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span>
+            <div class="proj-thumb" data-thumb>
+              <img src="https://catpp31.github.io/meigong/1792869297290.gif" alt="表情包">
+            </div>
+            <div class="proj-body">
+              <span class="proj-badge">陪玩署名</span>
+              <span class="proj-num" contenteditable="true">主玩xx</span>
+              <h4 contenteditable="true">三自定义文案自定义</h4>
+              <p contenteditable="true">自定义文案自定义噢文案自定义自定义。</p>
+            </div>
+          </div>
+          <div class="proj-card tone-mint" data-project data-detail="https://catpp31.github.io/meigong/微信图片_20261025045245_64_133.jpg">
+            <div class="proj-snow"></div>
+            <span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span>
+            <div class="proj-thumb" data-thumb>
+              <img src="https://catpp31.github.io/meigong/1792869261713.gif" alt="表情包">
+            </div>
+            <div class="proj-body">
+              <span class="proj-badge">陪玩署名</span>
+              <span class="proj-num" contenteditable="true">主玩xx</span>
+              <h4 contenteditable="true">自定义自定义自定义</h4>
+              <p contenteditable="true">自定义文案自定义噢文案自定义自定义。</p>
+            </div>
+          </div>
+          <div class="proj-card tone-blue" data-project data-detail="https://catpp31.github.io/meigong/微信图片_20261025045245_64_133.jpg">
+            <div class="proj-snow"></div>
+            <span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span>
+            <div class="proj-thumb" data-thumb>
+              <img src="https://catpp31.github.io/meigong/1792869282140.gif" alt="表情包">
+            </div>
+            <div class="proj-body">
+              <span class="proj-badge">陪玩署名</span>
+              <span class="proj-num" contenteditable="true">主玩xx</span>
+              <h4 contenteditable="true">自定义文案自定义</h4>
+              <p contenteditable="true">自定义文案自定义噢文案自定义自定义。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Project detail modal -->
+    <div class="proj-modal" id="projModal">
+      <div class="proj-modal-box">
+        <button class="proj-modal-close" id="projClose">✕</button>
+        <div class="meta" contenteditable="true">჻჻჻ ꔫ𝒉𝒂𝒑𝒑𝒚 ჻჻჻</div>
+        <h3 id="projModalTitle" contenteditable="true">项目标题</h3>
+        <div class="proj-modal-img" id="projModalImg">
+          <div class="ph">点击这里添加详情大图</div>
+        </div>
+        <p style="font-size:12.5px;color:#6a6f78;line-height:1.9" contenteditable="true">𐙚⊹₊⋆記憶是一場銹色的雨⋆⭒˚.⋆…</p>
+      </div>
+    </div>
+
+
+    <!-- Settings -->
+    <section id="sec-settings">
+      <div class="card">
+        <div class="sec-head">
+          <span class="sec-num">/ 03</span>
+          <h2 class="sec-title" contenteditable="true">设置</h2>
+        </div>
+        <div class="setting-row">
+          <span>点击水波纹</span>
+          <button class="toggle on" data-tg></button>
+        </div>
+        <div class="setting-row">
+          <span>玻璃质感边框</span>
+          <button class="toggle on" data-tg></button>
+        </div>
+        <div class="setting-row">
+          <span>自动保存编辑</span>
+          <button class="toggle" data-tg></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 隐藏的锁：右下角 -->
+<button class="lock-btn" id="lockBtn" aria-label="login">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="5" y="11" width="14" height="10" rx="2"/>
+    <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+  </svg>
+</button>
+
+<!-- 密码弹窗 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modalBox">
+    <h3>编辑权限</h3>
+    <p>当前为游客只读模式。输入密码进入编辑，所有文字与图片均可修改。</p>
+    <input type="password" id="pwdInput" placeholder="输入密码" autocomplete="off">
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modalCancel">取消</button>
+      <button class="modal-ok" id="modalOk">解锁</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+
+<script>
+/* ============ Wish Splash: starry sky + meteors ============ */
+(function(){
+  const wi = document.getElementById('wishIntro');
+  const sCv = document.getElementById('wishStars');
+  const mCv = document.getElementById('wishMeteors');
+  if(!wi || !sCv || !mCv) return;
+  const sCtx = sCv.getContext('2d');
+  const mCtx = mCv.getContext('2d');
+  let W,H;
+  function resize(){
+    W = sCv.width = mCv.width = innerWidth * devicePixelRatio;
+    H = sCv.height = mCv.height = innerHeight * devicePixelRatio;
+    sCv.style.width = mCv.style.width = innerWidth+'px';
+    sCv.style.height = mCv.style.height = innerHeight+'px';
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  // 静态星星
+  const stars = [];
+  for(let i=0;i<120;i++){
+    stars.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: (Math.random()*1.2+0.3)*devicePixelRatio,
+      o: Math.random()*0.7+0.2,
+      tw: Math.random()*Math.PI*2
+    });
+  }
+  function drawStars(){
+    sCtx.clearRect(0,0,W,H);
+    stars.forEach(s=>{
+      s.tw += 0.02;
+      const o = s.o * (0.6+Math.sin(s.tw)*0.3);
+      sCtx.fillStyle = `rgba(220,230,255,${o})`;
+      sCtx.beginPath(); sCtx.arc(s.x,s.y,s.r,0,Math.PI*2); sCtx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  // 流星
+  const ms = [];
+  function spawnM(){
+    const sx = Math.random()*W*1.2 - W*0.1;
+    const sy = Math.random()*H*0.5;
+    const vx = (2+Math.random()*3)*devicePixelRatio;
+    const vy = (1.2+Math.random()*1.5)*devicePixelRatio;
+    ms.push({sx,sy,vx,vy,life:0,max:60+Math.random()*40,len:(80+Math.random()*60)*devicePixelRatio});
+  }
+  function drawMeteors(){
+    mCtx.clearRect(0,0,W,H);
+    if(Math.random()<0.15 && ms.length<15) spawnM();
+    for(let i=ms.length-1;i>=0;i--){
+      const m = ms[i];
+      m.life++; m.sx+=m.vx; m.sy+=m.vy;
+      const t = m.life/m.max;
+      const alpha = t<0.2 ? t/0.2 : 1-Math.max(0,(t-0.6)/0.4);
+      const sp = Math.hypot(m.vx,m.vy);
+      const nx=m.vx/sp, ny=m.vy/sp;
+      const tx=m.sx-nx*m.len, ty=m.sy-ny*m.len;
+      const g = mCtx.createLinearGradient(tx,ty,m.sx,m.sy);
+      g.addColorStop(0,'rgba(255,255,255,0)');
+      g.addColorStop(1,'rgba(255,255,255,'+(0.8*alpha)+')');
+      mCtx.strokeStyle=g; mCtx.lineWidth=1.2*devicePixelRatio; mCtx.lineCap='round';
+      mCtx.beginPath(); mCtx.moveTo(tx,ty); mCtx.lineTo(m.sx,m.sy); mCtx.stroke();
+      if(m.life>=m.max || m.sx>W+50) ms.splice(i,1);
+    }
+    requestAnimationFrame(drawMeteors);
+  }
+  drawMeteors();
+
+  // 许愿逻辑
+  const input = document.getElementById('wishInput');
+  const go = document.getElementById('wishGo');
+  const toast = document.getElementById('wishToast');
+  const skip = document.getElementById('wishSkip');
+  function closeWish(){
+    wi.classList.add('gone');
+    setTimeout(()=>wi.remove(), 1300);
+  }
+  function wish(){
+    const txt = input.value.trim();
+    if(!txt){ input.focus(); return; }
+    // 飘字
+    const fly = document.createElement('div');
+    fly.className='wish-fly-text'; fly.textContent=txt;
+    wi.appendChild(fly);
+    requestAnimationFrame(()=>fly.classList.add('flying'));
+    input.value='';
+    // toast
+    setTimeout(()=>toast.classList.add('show'), 800);
+    // 关闭
+    setTimeout(closeWish, 3200);
+  }
+  go.addEventListener('click', wish);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') wish(); });
+  skip.addEventListener('click', closeWish);
+})();
+
+/* ============ Ripple on click ============ */
+let rippleEnabled = true;
+document.addEventListener('click', e=>{
+  if(!rippleEnabled) return;
+  if(e.target.closest('[contenteditable="true"], input, textarea, .g-item, .toggle')) return;
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  const size = 20;
+  r.style.width = r.style.height = size + 'px';
+  r.style.left = e.clientX + 'px';
+  r.style.top = e.clientY + 'px';
+  document.body.appendChild(r);
+  setTimeout(()=>r.remove(), 750);
+});
+
+/* ============ Editable: blur -> toast ============ */
+document.querySelectorAll('[contenteditable="true"]').forEach(el=>{
+  el.addEventListener('focus', ()=>el.classList.add('editing'));
+  el.addEventListener('blur', ()=>{
+    el.classList.remove('editing');
+    showToast('已保存修改');
+  });
+});
+
+/* ============ Gallery: swap image / add image ============ */
+const gallery = document.getElementById('gallery');
+const fileInput = document.getElementById('fileInput');
+let pendingItem = null;
+
+// default gradient placeholders (inline SVG data URLs, melancholic cold tones)
+const gradients = [
+  ['#dfe4ec','#a8b2c4'], ['#e8e4e0','#b8b0b8'],
+  ['#d8e0dc','#98a8a0'], ['#e0d8e0','#a898a8']
+];
+function makeSVG(g1,g2,label){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'>
+    <defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0' stop-color='${g1}'/><stop offset='1' stop-color='${g2}'/>
+    </linearGradient></defs>
+    <rect width='400' height='500' fill='url(#g)'/>
+    <circle cx='320' cy='110' r='60' fill='rgba(255,255,255,0.35)'/>
+    <rect x='40' y='380' width='320' height='2' fill='rgba(20,20,30,0.15)'/>
+    <text x='40' y='420' font-family='serif' font-size='18' fill='rgba(20,20,30,0.4)' letter-spacing='4'>${label}</text>
+  </svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+function applyPlaceholder(item, idx){
+  const [a,b] = gradients[idx % gradients.length];
+  const label = item.dataset.label || 'MEMO';
+  item.querySelector('img').src = makeSVG(a,b,label);
+}
+
+document.querySelectorAll('.g-item').forEach((item,i)=>applyPlaceholder(item,i));
+
+if(gallery){
+  gallery.addEventListener('click', e=>{
+    const add = e.target.closest('.g-add');
+    if(add){
+      pendingItem = 'new';
+      fileInput.click();
+      return;
+    }
+    const item = e.target.closest('.g-item');
+    if(item){
+      pendingItem = item;
+      fileInput.click();
+    }
+  });
+}
+
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    if(pendingItem === 'new' && gallery){
+      const div = document.createElement('div');
+      div.className = 'g-item';
+      div.innerHTML = `<img alt=""><div class="g-label" contenteditable="true">新图片</div>`;
+      div.querySelector('img').src = ev.target.result;
+      gallery.insertBefore(div, document.getElementById('gAdd'));
+    } else if(pendingItem){
+      // 项目缩略图
+      if(pendingItem.classList && pendingItem.classList.contains('proj-thumb')){
+        const ph = pendingItem.querySelector('.thumb-ph');
+        if(ph) ph.remove();
+        let img = pendingItem.querySelector('img');
+        if(!img){
+          img = document.createElement('img');
+          pendingItem.insertBefore(img, pendingItem.firstChild);
+        }
+        img.src = ev.target.result;
+      }
+      // 项目详情大图
+      else if(pendingItem.id === 'projModalImg'){
+        const ph = pendingItem.querySelector('.ph');
+        if(ph) ph.remove();
+        let img = pendingItem.querySelector('img');
+        if(!img){
+          img = document.createElement('img');
+          pendingItem.insertBefore(img, pendingItem.firstChild);
+        }
+        img.src = ev.target.result;
+      }
+      // tile 拼贴块
+      else if(pendingItem.classList && pendingItem.classList.contains('tile')){
+        const old = pendingItem.querySelector('svg');
+        if(old) old.remove();
+        let img = pendingItem.querySelector('img');
+        if(!img){
+          img = document.createElement('img');
+          pendingItem.insertBefore(img, pendingItem.firstChild);
+        }
+        img.src = ev.target.result;
+      } else {
+        pendingItem.querySelector('img').src = ev.target.result;
+      }
+    }
+    showToast('图片已替换');
+  };
+  reader.readAsDataURL(f);
+  fileInput.value = '';
+});
+
+/* ============ Collage wall: placeholders + click to swap ============ */
+(function(){
+  const SVGS = {
+    '教堂立面': `<svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <rect x="40" y="50" width="120" height="80"/>
+      <path d="M35 50 L100 15 L165 50 Z"/>
+      <circle cx="100" cy="40" r="8"/>
+      <line x1="100" y1="15" x2="100" y2="8"/>
+      <line x1="96" y1="11" x2="104" y2="11"/>
+      <rect x="85" y="90" width="30" height="40"/>
+      <line x1="60" y1="70" x2="80" y2="70"/><line x1="120" y1="70" x2="140" y2="70"/>
+      <line x1="60" y1="85" x2="80" y2="85"/><line x1="120" y1="85" x2="140" y2="85"/>
+    </svg>`,
+    '广场俯瞰': `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <rect x="20" y="20" width="160" height="160"/>
+      <rect x="60" y="60" width="80" height="80" stroke-dasharray="3 3"/>
+      <circle cx="100" cy="100" r="12" fill="#e85d4a" stroke="none" opacity="0.8"/>
+      <rect x="10" y="85" width="180" height="30"/>
+      <rect x="85" y="10" width="30" height="180"/>
+    </svg>`,
+    '街道肌理': `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" stroke="#5a6070" stroke-width="1" fill="none">
+      <path d="M10 40 Q60 30 100 50 T190 60"/>
+      <path d="M20 100 Q70 90 120 110 T190 120"/>
+      <path d="M30 160 Q80 150 130 170 T195 175"/>
+      <path d="M50 10 L60 190"/>
+      <path d="M120 10 L110 190"/>
+      <rect x="65" y="60" width="40" height="30"/>
+      <rect x="130" y="120" width="45" height="35"/>
+      <rect x="30" y="120" width="30" height="25"/>
+    </svg>`,
+    '人流尺度': `<svg viewBox="0 0 150 220" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <circle cx="40" cy="40" r="8"/><line x1="40" y1="48" x2="40" y2="100"/><line x1="40" y1="65" x2="25" y2="90"/><line x1="40" y1="65" x2="55" y2="90"/><line x1="40" y1="100" x2="30" y2="150"/><line x1="40" y1="100" x2="50" y2="150"/>
+      <circle cx="90" cy="30" r="7"/><line x1="90" y1="37" x2="90" y2="90"/><line x1="90" y1="55" x2="78" y2="80"/><line x1="90" y1="55" x2="102" y2="80"/><line x1="90" y1="90" x2="82" y2="140"/><line x1="90" y1="90" x2="98" y2="140"/>
+      <circle cx="65" cy="130" r="6"/><line x1="65" y1="136" x2="65" y2="180"/><line x1="65" y1="180" x2="58" y2="210"/><line x1="65" y1="180" x2="72" y2="210"/>
+    </svg>`,
+    '成熟树木': `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <line x1="100" y1="120" x2="100" y2="180"/>
+      <circle cx="100" cy="80" r="45" fill="rgba(120,150,110,0.3)"/>
+      <circle cx="75" cy="95" r="25" fill="rgba(120,150,110,0.25)"/>
+      <circle cx="125" cy="95" r="28" fill="rgba(120,150,110,0.25)"/>
+    </svg>`,
+    '飞鸟': `<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.5" fill="none">
+      <path d="M60 60 Q75 45 90 60 Q105 45 120 60"/>
+      <path d="M90 90 Q100 80 110 90 Q120 80 130 90"/>
+      <path d="M120 40 Q128 33 136 40 Q144 33 152 40"/>
+      <path d="M40 100 Q48 93 56 100 Q64 93 72 100"/>
+    </svg>`,
+    '建筑剖面': `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <line x1="20" y1="180" x2="180" y2="180"/>
+      <rect x="40" y="100" width="50" height="80"/>
+      <rect x="100" y="60" width="60" height="120"/>
+      <line x1="40" y1="130" x2="90" y2="130"/>
+      <line x1="40" y1="160" x2="90" y2="160"/>
+      <line x1="100" y1="100" x2="160" y2="100"/>
+      <line x1="100" y1="140" x2="160" y2="140"/>
+      <path d="M150 60 L150 30 L120 30"/>
+    </svg>`,
+    '时间轴': `<svg viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg" stroke="#3a3f4a" stroke-width="1.2" fill="none">
+      <line x1="20" y1="60" x2="280" y2="60"/>
+      <circle cx="40" cy="60" r="5" fill="#3a3f4a"/>
+      <circle cx="110" cy="60" r="5" fill="#3a3f4a"/>
+      <circle cx="180" cy="60" r="5" fill="#e85d4a"/>
+      <circle cx="250" cy="60" r="5" fill="#3a3f4a"/>
+      <text x="40" y="85" font-size="9" fill="#8a8f98" stroke="none" text-anchor="middle">1850</text>
+      <text x="110" y="85" font-size="9" fill="#8a8f98" stroke="none" text-anchor="middle">1920</text>
+      <text x="180" y="85" font-size="9" fill="#e85d4a" stroke="none" text-anchor="middle">1985</text>
+      <text x="250" y="85" font-size="9" fill="#8a8f98" stroke="none" text-anchor="middle">2026</text>
+    </svg>`
+  };
+
+  const collage = document.getElementById('collage');
+  if(!collage) return;
+  collage.querySelectorAll('.tile').forEach(tile=>{
+    const label = tile.dataset.label || '';
+    let svgKey = '';
+    for(const k of Object.keys(SVGS)){ if(label.includes(k)){ svgKey = k; break; } }
+    if(svgKey && !tile.querySelector('img')){
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:absolute;inset:8px;display:grid;place-items:center;';
+      wrap.innerHTML = SVGS[svgKey];
+      wrap.firstChild.style.width = '80%';
+      wrap.firstChild.style.height = '80%';
+      tile.insertBefore(wrap, tile.firstChild);
+    }
+    tile.addEventListener('click', e=>{
+      if(e.target.closest('[contenteditable="true"]')) return;
+      pendingItem = tile;
+      fileInput.click();
+    });
+  });
+})();
+
+/* ============ Bars animate on scroll ============ */
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.style.transform = `scaleX(${parseFloat(en.target.dataset.w)/100})`;
+    }
+  });
+},{threshold:0.3});
+document.querySelectorAll('.bar-fill').forEach(b=>io.observe(b));
+
+/* ============ Toggles ============ */
+document.querySelectorAll('[data-tg]').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    t.classList.toggle('on');
+    const on = t.classList.contains('on');
+    const label = t.parentElement.querySelector('span').textContent;
+    showToast(label + (on ? ' · 已开启' : ' · 已关闭'));
+    if(label.includes('波纹')) rippleEnabled = on;
+  });
+});
+
+/* ============ Auth: guest / editor ============ */
+const PWD = '12897531';
+const lockBtn = document.getElementById('lockBtn');
+const modalMask = document.getElementById('modalMask');
+const modalBox = document.getElementById('modalBox');
+const pwdInput = document.getElementById('pwdInput');
+const modalOk = document.getElementById('modalOk');
+const modalCancel = document.getElementById('modalCancel');
+
+function openModal(){
+  modalMask.classList.add('show');
+  modalBox.classList.remove('err');
+  pwdInput.value = '';
+  setTimeout(()=>pwdInput.focus(), 200);
+}
+function closeModal(){ modalMask.classList.remove('show'); }
+function tryUnlock(){
+  if(pwdInput.value === PWD){
+    document.body.classList.remove('guest');
+    document.body.classList.add('editor');
+    closeModal();
+    showToast('已解锁 · 现在可以编辑');
+  } else {
+    modalBox.classList.remove('err');
+    void modalBox.offsetWidth; // reflow
+    modalBox.classList.add('err');
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+lockBtn.addEventListener('click', openModal);
+modalCancel.addEventListener('click', closeModal);
+modalOk.addEventListener('click', tryUnlock);
+pwdInput.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+modalMask.addEventListener('click', e=>{ if(e.target===modalMask) closeModal(); });
+
+/* Hero roll: 编辑时暂停滚动 */
+const rollTrack = document.getElementById('rollTrack');
+document.querySelectorAll('#rollTrack span').forEach(s=>{
+  s.addEventListener('focus', ()=>rollTrack.classList.add('paused'));
+  s.addEventListener('blur', ()=>{
+    rollTrack.classList.remove('paused');
+    showToast('滚动文字已更新');
+  });
+});
+
+/* ============ Flip cards ============ */
+document.querySelectorAll('.flip').forEach(card=>{
+  card.addEventListener('click', e=>{
+    // 编辑文字时不翻转
+    if(e.target.closest('[contenteditable="true"]')) return;
+    card.classList.toggle('flipped');
+  });
+});
+
+/* ============ Project cards: thumb swap + detail modal ============ */
+const projModal = document.getElementById('projModal');
+const projClose = document.getElementById('projClose');
+const projModalImg = document.getElementById('projModalImg');
+const projModalTitle = document.getElementById('projModalTitle');
+
+document.querySelectorAll('.proj-card').forEach(card=>{
+  // 点缩略图：换缩略图
+  const thumb = card.querySelector('[data-thumb]');
+  thumb.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(e.target.closest('[contenteditable="true"]')) return;
+    pendingItem = thumb;
+    fileInput.click();
+  });
+  // 点卡片其他位置：打开详情
+  card.addEventListener('click', e=>{
+    if(e.target.closest('[contenteditable="true"]')) return;
+    if(e.target.closest('[data-thumb]')) return;
+    const title = card.querySelector('h4').textContent.trim();
+    projModalTitle.textContent = title;
+    // 详情大图：用卡上的 data-detail 图（没有则保留现有图）
+    const detail = card.getAttribute('data-detail');
+    if(detail){
+      let img = projModalImg.querySelector('img');
+      if(!img){
+        const ph = projModalImg.querySelector('.ph');
+        if(ph) ph.remove();
+        img = document.createElement('img');
+        projModalImg.insertBefore(img, projModalImg.firstChild);
+      }
+      img.src = detail;
+    }
+    projModal.classList.add('show');
+  });
+});
+projClose.addEventListener('click', ()=>projModal.classList.remove('show'));
+projModal.addEventListener('click', e=>{ if(e.target===projModal) projModal.classList.remove('show'); });
+// 点详情大图位置：换详情图
+projModalImg.addEventListener('click', e=>{
+  if(e.target.closest('[contenteditable="true"]')) return;
+  pendingItem = projModalImg;
+  fileInput.click();
+});
+
+/* ============ Meteor shower (hero only) ============ */
+(function(){
+  const cv = document.getElementById('meteorCanvas');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  let W, H, meteors = [];
+  function resize(){
+    const r = cv.parentElement.getBoundingClientRect();
+    W = cv.width = r.width * devicePixelRatio;
+    H = cv.height = r.height * devicePixelRatio;
+    cv.style.width = r.width + 'px';
+    cv.style.height = r.height + 'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function spawn(){
+    const sx = Math.random() * W * 0.8 + W * 0.15;
+    const sy = -20 - Math.random()*60;
+    const vx = -(2 + Math.random()*3.5) * devicePixelRatio;
+    const vy = (2.5 + Math.random()*3) * devicePixelRatio;
+    // 偶尔一颗亮大流星
+    const isBright = Math.random() < 0.18;
+    meteors.push({sx, sy, vx, vy, life:0,
+      maxLife: isBright ? 80 + Math.random()*30 : 50 + Math.random()*25,
+      len: (isBright ? 90 + Math.random()*50 : 35 + Math.random()*35) * devicePixelRatio,
+      w: (isBright ? 1.8 + Math.random()*0.8 : 0.6 + Math.random()*0.6) * devicePixelRatio,
+      bright: isBright});
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    if(Math.random() < 0.09 && meteors.length < 22) spawn();
+
+    for(let i=meteors.length-1;i>=0;i--){
+      const m = meteors[i];
+      m.life++;
+      m.sx += m.vx; m.sy += m.vy;
+      const t = m.life / m.maxLife;
+      const alpha = t < 0.15 ? t/0.15 : 1 - Math.max(0,(t-0.55)/0.45);
+      const sp = Math.hypot(m.vx, m.vy);
+      const nx = m.vx/sp, ny = m.vy/sp;
+      const tx = m.sx - nx*m.len, ty = m.sy - ny*m.len;
+      const grad = ctx.createLinearGradient(tx,ty,m.sx,m.sy);
+      grad.addColorStop(0, 'rgba(200,215,235,0)');
+      grad.addColorStop(0.7, 'rgba(160,180,210,'+(0.35*alpha)+')');
+      grad.addColorStop(1, m.bright ? 'rgba(255,255,255,'+(0.9*alpha)+')' : 'rgba(60,70,90,'+(0.55*alpha)+')');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = m.w;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(tx,ty);
+      ctx.lineTo(m.sx,m.sy);
+      ctx.stroke();
+      // 亮流星加光晕
+      if(m.bright){
+        ctx.fillStyle = 'rgba(255,255,255,'+(0.6*alpha)+')';
+        ctx.beginPath();
+        ctx.arc(m.sx, m.sy, m.w*2.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      if(m.life >= m.maxLife || m.sy > H+40 || m.sx < -40) meteors.splice(i,1);
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ============ Fog wipe + snow ============ */
+(function(){
+  const intro = document.getElementById('intro');
+  const fog = document.getElementById('introFog');
+  const snow = document.getElementById('introSnow');
+  const hint = document.getElementById('introHint');
+  const enterWrap = document.getElementById('enterWrap');
+  const enterBtn = document.getElementById('enterBtn');
+  if(!intro || !fog) return;
+  const fctx = fog.getContext('2d');
+  const sctx = snow.getContext('2d');
+  let W, H, cleared = false;
+
+  function sizeCanvases(){
+    W = fog.width = snow.width = innerWidth * devicePixelRatio;
+    H = fog.height = snow.height = innerHeight * devicePixelRatio;
+    fog.style.width = snow.style.width = innerWidth + 'px';
+    fog.style.height = snow.style.height = innerHeight + 'px';
+    paintFog();
+  }
+  function paintFog(){
+    fctx.globalCompositeOperation = 'source-over';
+    fctx.fillStyle = 'rgba(232,236,242,0.95)';
+    fctx.fillRect(0,0,W,H);
+    for(let i=0;i<600;i++){
+      const x = Math.random()*W, y = Math.random()*H;
+      const r = Math.random()*3*devicePixelRatio;
+      fctx.fillStyle = `rgba(255,255,255,${0.15+Math.random()*0.25})`;
+      fctx.beginPath(); fctx.arc(x,y,r,0,Math.PI*2); fctx.fill();
+    }
+  }
+  sizeCanvases();
+  window.addEventListener('resize', sizeCanvases);
+
+  let wiped = 0;
+  function wipe(cx, cy){
+    if(cleared) return;
+    const r = 60 * devicePixelRatio;
+    // 柔边擦除：渐变淡入淡出
+    fctx.globalCompositeOperation = 'destination-out';
+    const grad = fctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    grad.addColorStop(0,'rgba(0,0,0,1)');
+    grad.addColorStop(0.6,'rgba(0,0,0,0.6)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    fctx.fillStyle = grad;
+    fctx.beginPath(); fctx.arc(cx,cy,r,0,Math.PI*2); fctx.fill();
+
+    wiped += 1;
+    if(wiped > 35){
+      cleared = true;
+      fog.classList.add('cleared');
+      hint.style.opacity = '0';
+      setTimeout(()=>enterWrap.classList.add('show'), 400);
+    }
+  }
+  function pos(e){
+    if(e.touches && e.touches[0]){
+      return [ e.touches[0].clientX*devicePixelRatio,
+               e.touches[0].clientY*devicePixelRatio ];
+    }
+    return [ e.clientX*devicePixelRatio, e.clientY*devicePixelRatio ];
+  }
+  fog.addEventListener('mousemove', e=>{ const [x,y]=pos(e); wipe(x,y); });
+  fog.addEventListener('touchmove', e=>{ e.preventDefault(); const [x,y]=pos(e); wipe(x,y); }, {passive:false});
+  fog.addEventListener('click', e=>{ const [x,y]=pos(e); for(let i=0;i<6;i++) wipe(x+(Math.random()-0.5)*40, y+(Math.random()-0.5)*40); });
+
+  // 进入按钮
+  enterBtn.addEventListener('click', ()=>{
+    document.body.classList.add('entered');
+    intro.classList.add('gone');
+    setTimeout(()=>intro.remove(), 1200);
+  });
+
+  // 雪花
+  const flakes = [];
+  for(let i=0;i<140;i++){
+    const big = Math.random() < 0.15;
+    flakes.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: big ? (2 + Math.random()*2.5)*devicePixelRatio
+             : (0.6 + Math.random()*1.4)*devicePixelRatio,
+      vy: (big ? 1.2+Math.random()*1.2 : 0.6+Math.random()*0.9)*devicePixelRatio,
+      vx: (Math.random()-0.5)*0.8*devicePixelRatio,
+      o: big ? 0.5+Math.random()*0.4 : 0.25+Math.random()*0.45,
+      drift: Math.random()*Math.PI*2,
+      driftSpeed: 0.02+Math.random()*0.03
+    });
+  }
+  function snowTick(){
+    sctx.clearRect(0,0,W,H);
+    flakes.forEach(f=>{
+      f.drift += f.driftSpeed;
+      f.y += f.vy;
+      f.x += f.vx + Math.sin(f.drift)*0.6*devicePixelRatio;
+      if(f.y > H+10){ f.y = -10; f.x = Math.random()*W; }
+      if(f.x < -10) f.x = W+10; if(f.x > W+10) f.x = -10;
+      sctx.fillStyle = `rgba(255,255,255,${f.o})`;
+      sctx.beginPath(); sctx.arc(f.x,f.y,f.r,0,Math.PI*2); sctx.fill();
+      if(f.r > 2*devicePixelRatio){
+        sctx.fillStyle = `rgba(255,255,255,${f.o*0.25})`;
+        sctx.beginPath(); sctx.arc(f.x,f.y,f.r*2.2,0,Math.PI*2); sctx.fill();
+      }
+    });
+    requestAnimationFrame(snowTick);
+  }
+  snowTick();
+})();
+
+/* ============ Toast ============ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* ============ Global snow (whole page) ============ */
+(function(){
+  const cv = document.getElementById('globalSnow');
+  if(!cv) return;
+  const ctx = cv.getContext('2d');
+  let W, H;
+  const flakes = [];
+  function resize(){
+    W = cv.width = innerWidth * devicePixelRatio;
+    H = cv.height = innerHeight * devicePixelRatio;
+    cv.style.width = innerWidth + 'px';
+    cv.style.height = innerHeight + 'px';
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  for(let i=0;i<80;i++){
+    const big = Math.random() < 0.15;
+    flakes.push({
+      x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+      r: (big ? 1.8+Math.random()*2 : 0.6+Math.random()*1.2)*devicePixelRatio,
+      vy: (big ? 0.8+Math.random()*1 : 0.4+Math.random()*0.6)*devicePixelRatio,
+      vx: (Math.random()-0.5)*0.4*devicePixelRatio,
+      o: big ? 0.5+Math.random()*0.3 : 0.25+Math.random()*0.4,
+      drift: Math.random()*Math.PI*2,
+      ds: 0.015+Math.random()*0.02
+    });
+  }
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    flakes.forEach(f=>{
+      f.drift += f.ds;
+      f.y += f.vy;
+      f.x += f.vx + Math.sin(f.drift)*0.4*devicePixelRatio;
+      if(f.y > H+10){ f.y = -10; f.x = Math.random()*W; }
+      if(f.x < -10) f.x = W+10; if(f.x > W+10) f.x = -10;
+      ctx.fillStyle = `rgba(255,255,255,${f.o})`;
+      ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
+</body>
+</html>
+<!-- （注：内容由AI生成） -->
