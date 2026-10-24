@@ -219,12 +219,21 @@ body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
 .hero-title{
   font-family:'Noto Serif SC',serif;
   font-size:clamp(38px,9vw,68px);
-  font-weight:300;line-height:1.5;letter-spacing:2px;
+  font-weight:300;letter-spacing:2px;
   color:#111;
+  margin:0;
+}
+.hero-line{
+  line-height:1.4;
+  margin:0.35em 0;
+}
+.hero-line-roll{
+  height:1.7em;
+  overflow:hidden;
+  line-height:1.7em;
 }
 .hero-roll{
-  display:inline-block;height:1.5em;overflow:hidden;vertical-align:bottom;
-  position:relative;
+  display:inline-block;position:relative;
 }
 .hero-roll-track{
   display:flex;flex-direction:column;
@@ -232,7 +241,7 @@ body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
   animation:rollUp 10s cubic-bezier(.6,0,.35,1) infinite;
 }
 .hero-roll-track span{
-  height:1.5em;line-height:1.5em;
+  height:1.7em;line-height:1.7em;
   font-style:italic;
   background:linear-gradient(135deg,#1a1a1c 0%,#5a6070 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -240,11 +249,11 @@ body.editor #sec-settings{display:block;animation:fadeUp .6s ease}
 }
 @keyframes rollUp{
   0%,14%{transform:translateY(0)}
-  20%,35%{transform:translateY(-1.5em)}
-  41%,56%{transform:translateY(-3em)}
-  62%,77%{transform:translateY(-4.5em)}
-  83%,94%{transform:translateY(-6em)}
-  100%{transform:translateY(-7.5em)}
+  20%,35%{transform:translateY(-1.7em)}
+  41%,56%{transform:translateY(-3.4em)}
+  62%,77%{transform:translateY(-5.1em)}
+  83%,94%{transform:translateY(-6.8em)}
+  100%{transform:translateY(-8.5em)}
 }
 .hero-desc{
   margin-top:40px;font-size:14px;color:#6a6f78;max-width:440px;line-height:2;
@@ -752,18 +761,20 @@ section{scroll-margin-top:40px;margin-bottom:48px}
       <div class="hero-text">
       <div class="hero-tag" contenteditable="true">‧₊˚✧ Oᴜʀ ᴡʜɪᴛᴇ ᴍᴇᴍᴏʀɪᴇs ʙᴇʟᴏɴɢ ᴛᴏ ᴜs ⁎⊹⁺</div>
       <h1 class="hero-title">
-        <span contenteditable="true">我的情绪也会</span><br>
-        <span class="hero-roll">
-          <span class="hero-roll-track" id="rollTrack">
-            <span contenteditable="true">堆积，</span>
-            <span contenteditable="true">厚重，</span>
-            <span contenteditable="true">崩塌，</span>
-            <span contenteditable="true">纷飞，</span>
-            <span contenteditable="true">停息，</span>
-            <span contenteditable="true">堆积，</span>
+        <div class="hero-line" contenteditable="true">我的情绪也会</div>
+        <div class="hero-line hero-line-roll">
+          <span class="hero-roll">
+            <span class="hero-roll-track" id="rollTrack">
+              <span contenteditable="true">堆积，</span>
+              <span contenteditable="true">厚重，</span>
+              <span contenteditable="true">崩塌，</span>
+              <span contenteditable="true">纷飞，</span>
+              <span contenteditable="true">停息，</span>
+              <span contenteditable="true">堆积，</span>
+            </span>
           </span>
-        </span><br>
-        <span contenteditable="true">那我是雪花吗。</span>
+        </div>
+        <div class="hero-line" contenteditable="true">那我是雪花吗。</div>
       </h1>
       <p class="hero-desc" contenteditable="true">
         𓈒𓏸˚₊雪 が 交互 に 降る 瞬間𓇬₊˚。
